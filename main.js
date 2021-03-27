@@ -21,8 +21,18 @@ d3.csv("../data/football.csv").then(function(data) {
     data = cleanData(data);
     yearCounts = d3.nest().key(function(d) { return d.year;}).rollup(function(v) { return v.length}).entries(data)
     year_num_examples = 10
-    yearCounts = yearCounts.slice(yearCounts.length - year_num_examples - 1, yearCounts.length - 1)
-    console.log(yearCounts)
+    yearCounts = yearCounts.slice(yearCounts.length - year_num_examples - 1, yearCounts.length - 1) // For last 10 full years
+    createFirstGraph(yearCounts)
+    findWinningPercentages(data)
+
+    
+
+
+    
+
+});
+
+function createFirstGraph(yearCounts) {
 
     let x = d3.scaleLinear()
         .domain([0, d3.max(yearCounts, function(d){
@@ -38,15 +48,8 @@ d3.csv("../data/football.csv").then(function(data) {
     let y_axis = d3.axisLeft(y).tickSize(0).tickPadding(10);
     svg1.append("g")
         .call(y_axis);
-    /*
-        This next line does the following:
-            1. Select all desired elements in the DOM
-            2. Count and parse the data values
-            3. Create new, data-bound elements for each data value
-     */
     let bars = svg1.selectAll("rect").data(yearCounts);
 
-    // OPTIONAL: Define color scale
     let color = d3.scaleOrdinal()
         .domain(yearCounts.map(function(d) { return d.key }))
         .range(d3.quantize(d3.interpolateHcl("#66a0e2", "#81c2c3"), year_num_examples));
@@ -54,44 +57,82 @@ d3.csv("../data/football.csv").then(function(data) {
     bars.enter()
         .append("rect")
         .merge(bars)
-        .attr("fill", function(d) { return color(d.key) }) // Here, we are using functin(d) { ... } to return fill colors based on the data point d
+        .attr("fill", function(d) { return color(d.key) }) 
         .attr("x", x(0))
-        .attr("y", function(d) { return y(d.key)})               // HINT: Use function(d) { return ...; } to apply styles based on the data point (d)
+        .attr("y", function(d) { return y(d.key)})               
         .attr("width", function(d) { return x(d.value)})
-        .attr("height",  y.bandwidth());        // HINT: y.bandwidth() makes a reasonable display height
+        .attr("height",  y.bandwidth());        
     
     let counts = countRef.selectAll("text").data(yearCounts);
 
-    // TODO: Render the text elements on the DOM
     counts.enter()
         .append("text")
         .merge(counts)
-        .attr("x", function(d) {return x(d.value) + 10})       // HINT: Add a small offset to the right edge of the bar, found by x(d.count)
-        .attr("y", function(d) {return y(d.key) + 10})       // HINT: Add a small offset to the top edge of the bar, found by y(d.artist)
+        .attr("x", function(d) {return x(d.value) + 10})       
+        .attr("y", function(d) {return y(d.key) + 10})      
         .style("text-anchor", "start")
-        .text(function(d) { return d.value});           // HINT: Get the count of the artist
+        .text(function(d) { return d.value});          
 
 
-    // TODO: Add x-axis label
     svg1.append("text")
-        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2 }, ${graph_1_height - margin.bottom - 20})`)       // HINT: Place this at the bottom middle edge of the graph - use translate(x, y) that we discussed earlier
+        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2 }, ${graph_1_height - margin.bottom - 20})`) 
         .style("text-anchor", "middle")
         .text("Count");
 
-    // TODO: Add y-axis label
     svg1.append("text")
-        .attr("transform", `translate(${-70}, ${(graph_1_height - margin.top - margin.bottom) / 2})`)       // HINT: Place this at the center left edge of the graph - use translate(x, y) that we discussed earlier
+        .attr("transform", `translate(${-70}, ${(graph_1_height - margin.top - margin.bottom) / 2})`)       
         .style("text-anchor", "middle")
         .text("Year");
 
     // TODO: Add chart title
     svg1.append("text")
-        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2}, -20)`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
+        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2}, -20)`)      
         .style("text-anchor", "middle")
         .style("font-size", 15)
         .text("Football Matches by Year");
 
-});
+}
+
+function findWinningPercentages(data) {
+    let home_dict = d3.nest().key(function(d) { return d.home_team;}).entries(data)
+    let away_dict = d3.nest().key(function(d) { return d.away_team;}).entries(data)
+    let keySet = new Set()
+    let res = []
+    home_dict.forEach((pair) => {
+        keySet.add(pair.key)
+        for (i = 0; i < away_dict.length; i++) {
+            if (pair.key == away_dict[i].key) {
+                pair.values = pair.values.concat(away_dict[i].values)
+            }
+        }
+    })
+    console.log(home_dict)
+    away_dict.forEach((pair) => {
+        if (!(keySet.has(pair.key))) {
+            home_dict.push(pair)
+        }
+    })
+    home_dict.forEach((d) => {
+        winCount = 0
+        d.values.forEach((game) => {
+            if (d.key === game.home_team) {
+                if (game.home_score > game.away_score) {
+                    winCount++;
+                }
+            } else {
+                if (game.home_score < game.away_score) {
+                    winCount++;
+                }
+            }
+        })
+        percentWin = winCount / d.values.length
+        if (d.values.length >= 50) {
+            d.percentWin = percentWin
+            res.push(d)
+        }
+    })
+    console.log(res)
+}
 
 /**
  * Cleans the provided data using the given comparator then strips to first numExamples
