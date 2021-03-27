@@ -20,7 +20,7 @@ let countRef = svg1.append("g");
 d3.csv("../data/football.csv").then(function(data) {
     data = cleanData(data);
     yearCounts = d3.nest().key(function(d) { return d.year;}).rollup(function(v) { return v.length}).entries(data)
-    year_num_examples = 5
+    year_num_examples = 10
     yearCounts = yearCounts.slice(yearCounts.length - year_num_examples - 1, yearCounts.length - 1)
     console.log(yearCounts)
 
@@ -74,19 +74,19 @@ d3.csv("../data/football.csv").then(function(data) {
 
     // TODO: Add x-axis label
     svg1.append("text")
-        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2}, ${graph_1_height - margin.bottom - 30})`)       // HINT: Place this at the bottom middle edge of the graph - use translate(x, y) that we discussed earlier
+        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2 }, ${graph_1_height - margin.bottom - 20})`)       // HINT: Place this at the bottom middle edge of the graph - use translate(x, y) that we discussed earlier
         .style("text-anchor", "middle")
         .text("Count");
 
     // TODO: Add y-axis label
     svg1.append("text")
-        .attr("transform", `translate(${-100}, ${(graph_1_height - margin.top - margin.bottom) / 2})`)       // HINT: Place this at the center left edge of the graph - use translate(x, y) that we discussed earlier
+        .attr("transform", `translate(${-70}, ${(graph_1_height - margin.top - margin.bottom) / 2})`)       // HINT: Place this at the center left edge of the graph - use translate(x, y) that we discussed earlier
         .style("text-anchor", "middle")
         .text("Year");
 
     // TODO: Add chart title
     svg1.append("text")
-        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2}, -10)`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
+        .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2}, -20)`)       // HINT: Place this at the top middle edge of the graph - use translate(x, y) that we discussed earlier
         .style("text-anchor", "middle")
         .style("font-size", 15)
         .text("Football Matches by Year");
