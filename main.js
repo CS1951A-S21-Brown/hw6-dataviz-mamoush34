@@ -31,6 +31,11 @@ let svg3 = d3.select("#graph3")
     .append("g")
     .attr('transform', `translate(${margin.left}, ${margin.top})`); 
 
+let tooltip = d3.select("#graph3")     // HINT: div id for div containing scatterplot
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
 let x_3 = d3.scaleLinear()
     .range([0, graph_3_width - margin.left - margin.right]);
 
@@ -58,7 +63,6 @@ d3.csv("../data/football.csv").then(function(data) {
     win_num_examples = 10
     slicedWinData = footballData.slice(0, 10)
     worldCupData = footballData
-    console.log(footballData)
     d3.csv("../data/countries.csv").then(function(countryData) {
         createSecondGraph(slicedWinData, countryData)
     });
@@ -129,7 +133,6 @@ function createFirstGraph(yearCounts) {
         .style("text-anchor", "middle")
         .text("Year");
 
-    // TODO: Add chart title
     svg1.append("text")
         .attr("transform", `translate(${(graph_1_width - margin.right - margin.left) / 2}, -20)`)      
         .style("text-anchor", "middle")
@@ -139,7 +142,11 @@ function createFirstGraph(yearCounts) {
 }
 
 function createSecondGraph (footballData, countryData) {
+    countryMap = new Map()
+    countryNames = new Set()
     footballData.forEach((country) => {
+        countryMap.set(country.key, country.percentWin)
+        countryNames.add(country.key)
         for (i = 0; i < countryData.length; i++) {
             if (countryData[i].name === country.key) {
                 country.lat = parseFloat(countryData[i].latitude)
@@ -147,6 +154,31 @@ function createSecondGraph (footballData, countryData) {
             }
         }
     });
+
+    let getFromMap = (countryName) => {
+        percentage = countryMap.get(countryName)
+        return percentage != undefined ? `Win Percentage: <span style="color: blue;">${percentage}` : `<span style="color: blue;"> Not in Top 10`
+    }
+
+    let mouseover = function(d) {
+        let html = `
+                <span style="color: blue;">${d.properties.name}</span><br/>
+                ${getFromMap(d.properties.name)}</span>`;       
+
+        tooltip.html(html)
+            .style("left", `${(d3.event.pageX) - 700}px`)
+            .style("top", `${(d3.event.pageY) - 70}px`)
+            .style("box-shadow", `2px 2px 5px blue`)    
+            .transition()
+            .duration(200)
+            .style("opacity", 0.9)
+    };
+
+    let mouseout = function(d) {
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", 0);
+    };
 
     let projection = d3.geoNaturalEarth()
         .scale(graph_2_width / 1.8 / Math.PI)
@@ -160,23 +192,20 @@ function createSecondGraph (footballData, countryData) {
             .selectAll("path")
             .data(data.features)
             .enter().append("path")
-                .attr("fill", "#69b3a2")
+                .attr("fill", function(d) {
+                    if (countryNames.has(d.properties.name)) {
+                        return "blue"
+                    } else {
+                        return "#69b3a2"
+                    }
+                })
                 .attr("d", d3.geoPath()
                     .projection(projection)
                 )
-                .style("stroke", "#fff");
-
-        let countRef2 = svg2.append("g");
-        let markers = countRef2.selectAll(".mark").data(footballData);
-
-        markers.enter()
-            .append("image")
-            .attr('class','mark')
-            .attr('width', 15)
-            .attr('height', 15)
-            .attr('title', function(d) {return d.key})
-            .attr("xlink:href",'https://cdn3.iconfinder.com/data/icons/softwaredemo/PNG/24x24/DrawingPin1_Blue.png')
-            .attr("transform", d => `translate(${projection([d.long - 2, d.lat + 5])})`); 
+                .attr("title" , "anan")
+                .style("stroke", "#fff")
+                .on("mouseover", mouseover) // HINT: Pass in the mouseover and mouseout functions here
+                .on("mouseout", mouseout);
         
             
         svg2.append("text")
@@ -220,7 +249,7 @@ function findWinningPercentages(data) {
         });
         percentWin = winCount / d.values.length
         if (d.values.length >= 100) {
-            d.percentWin = percentWin
+            d.percentWin = (percentWin * 100).toFixed(2)
             res.push(d)
         }
     })
