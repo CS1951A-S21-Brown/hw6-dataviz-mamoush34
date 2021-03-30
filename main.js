@@ -26,12 +26,12 @@ let svg2 = d3.select("#graph2")
 
 let svg3 = d3.select("#graph3")
     .append("svg")
-    .attr('width', graph_3_width)     // HINT: width
-    .attr('height', graph_3_height)     // HINT: height
+    .attr('width', graph_3_width)     
+    .attr('height', graph_3_height)    
     .append("g")
     .attr('transform', `translate(${margin.left}, ${margin.top})`); 
 
-let tooltip = d3.select("#graph3")     // HINT: div id for div containing scatterplot
+let tooltip = d3.select("#graph3")     
     .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
@@ -74,11 +74,6 @@ d3.csv("../data/football.csv").then(function(data) {
     createThirdGraph()
     setThirdGraphData(null)
 
-
-
-
-
-
 });
 
 function createFirstGraph(yearCounts) {
@@ -92,7 +87,7 @@ function createFirstGraph(yearCounts) {
     let y = d3.scaleBand()
         .domain(yearCounts.map((d) => d.key))
         .range([0, graph_1_height - margin.top - margin.bottom]) 
-        .padding(0.1);  // Improves readability
+        .padding(0.1);  
     
     let y_axis = d3.axisLeft(y).tickSize(0).tickPadding(10);
     svg1.append("g")
@@ -202,9 +197,8 @@ function createSecondGraph (footballData, countryData) {
                 .attr("d", d3.geoPath()
                     .projection(projection)
                 )
-                .attr("title" , "anan")
                 .style("stroke", "#fff")
-                .on("mouseover", mouseover) // HINT: Pass in the mouseover and mouseout functions here
+                .on("mouseover", mouseover) 
                 .on("mouseout", mouseout);
         
             
@@ -290,11 +284,10 @@ function createThirdGraph() {
         .text("Winning Percentage");
 
     svg3.append("text")
-        .attr("transform", `translate(${-70}, ${(graph_3_height - margin.top - margin.bottom) / 2})`)       
+        .attr("transform", `translate(${-100}, ${(graph_3_height - margin.top - margin.bottom) / 2})`)       
         .style("text-anchor", "middle")
         .text("Country");
 
-    // TODO: Add chart title
     svg3.append("text")
         .attr("transform", `translate(${(graph_3_width - margin.right - margin.left) / 2}, -20)`)      
         .style("text-anchor", "middle")
@@ -325,7 +318,7 @@ function setThirdGraphData(increment) {
     x_3.domain([0, 100]);
 
     y_3.domain(slicedData.map((d) => d.key));
-    let y_axis = d3.axisLeft(y_3).tickSize(0).tickPadding(10); //maybe this is wrong
+    let y_axis = d3.axisLeft(y_3).tickSize(0).tickPadding(10); 
     y_axis_label.call(y_axis);
     let bars = svg3.selectAll("rect").data(slicedData);
 
@@ -346,18 +339,16 @@ function setThirdGraphData(increment) {
      */
     let counts = countRef3.selectAll("text").data(slicedData);
 
-    // TODO: Render the text elements on the DOM
     counts.enter()
         .append("text")
         .merge(counts)
         .transition()
         .duration(1000)
-        .attr("x", function(d) {return x_3(d.worldCupPercentWin) + 10})       // HINT: Add a small offset to the right edge of the bar, found by x(d.count)
-        .attr("y", function(d) {return y_3(d.key) + 10})       // HINT: Add a small offset to the top edge of the bar, found by y(d.artist)
+        .attr("x", function(d) {return x_3(d.worldCupPercentWin) + 10})       
+        .attr("y", function(d) {return y_3(d.key) + 10})       
         .style("text-anchor", "start")
-        .text(function(d) {return d.worldCupPercentWin});           // HINT: Get the count of the artist
+        .text(function(d) {return d.worldCupPercentWin}); 
 
-    // Remove elements not in use if fewer groups in new dataset
     bars.exit().remove();
     counts.exit().remove();
  
@@ -372,7 +363,6 @@ function setThirdGraphData(increment) {
  * instances
  */
  function cleanData(data) {
-    // TODO: sort and return the given data with the comparator (extracting the desired number of examples)
     data.forEach((d) => { 
         d.home_score = parseInt(d.home_score) 
         d.away_score = parseInt(d.away_score)
