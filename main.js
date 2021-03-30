@@ -292,7 +292,7 @@ function createThirdGraph() {
         .attr("transform", `translate(${(graph_3_width - margin.right - margin.left) / 2}, -20)`)      
         .style("text-anchor", "middle")
         .style("font-size", 15)
-        .text("Winning Percentage in Last 2 World Cups");
+        .text("Winning Percentage of Nations in Last 2 World Cups");
 
 }
 
