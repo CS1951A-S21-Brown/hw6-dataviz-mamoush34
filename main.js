@@ -63,7 +63,7 @@ d3.csv("../data/football.csv").then(function(data) {
     win_num_examples = 10
     slicedWinData = footballData.slice(0, 10)
     worldCupData = footballData
-    d3.csv("../data/countries.csv").then(function(countryData) {
+    d3.csv("./data/countries.csv").then(function(countryData) {
         createSecondGraph(slicedWinData, countryData)
     });
 
